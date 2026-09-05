@@ -20,7 +20,7 @@ Responda SOMENTE com um array JSON válido, sem markdown, sem texto extra, no fo
 
   try {
     const response = await client.messages.create({
-      model: "claude-opus-5",
+      model: "claude-haiku-4-5",
       max_tokens: 2000,
       system,
       messages: [{ role: "user", content: `Gere ${count} cartas novas agora.` }],
