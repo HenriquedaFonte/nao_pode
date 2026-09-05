@@ -336,27 +336,15 @@ function playAlarm(){
 async function fetchMoreCards(themes, excludeWords, count){
   const themeLabels = themes.map(id => THEMES.find(t=>t.id===id).label).join(', ');
   const exclude = Array.from(excludeWords).slice(-120).join(', ');
-  const system = `Você cria cartas para um jogo de tabuleiro tipo "Taboo" em português do Brasil.
-Cada carta tem: uma palavra-alvo (curta, conhecida, sem ser um nome próprio muito obscuro) e exatamente 5 palavras proibidas fortemente associadas a ela.
-Gere cartas dos temas: ${themeLabels}.
-Misture dificuldades fácil, média e difícil.
-NÃO repita nenhuma destas palavras já usadas: ${exclude || '(nenhuma ainda)'}.
-Responda SOMENTE com um array JSON válido, sem markdown, sem texto extra, no formato:
-[{"palavra":"EXEMPLO","proibidas":["a","b","c","d","e"],"categoria":"Geral","dificuldade":"facil"}]`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("/api/generate-cards", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1000,
-      system: system,
-      messages: [{role:"user", content:`Gere ${count} cartas novas agora.`}]
-    })
+    body: JSON.stringify({ themeLabels, exclude, count })
   });
+  if(!response.ok) throw new Error('Falha ao gerar cartas: ' + response.status);
   const data = await response.json();
-  const text = data.content.map(b => b.type==='text' ? b.text : '').join('');
-  const clean = text.replace(/```json|```/g,'').trim();
+  const clean = data.text.replace(/```json|```/g,'').trim();
   const cards = JSON.parse(clean);
   return cards.filter(c => c.palavra && Array.isArray(c.proibidas));
 }
