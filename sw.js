@@ -1,5 +1,5 @@
-const CACHE_NAME = 'nao-pode-v1';
-const SHELL_FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE_NAME = 'nao-pode-v3';
+const SHELL_FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './cards.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -23,8 +23,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        }
         return res;
       }).catch(() => cached);
       return cached || network;
