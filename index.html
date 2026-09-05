@@ -151,7 +151,7 @@
   .card-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:0; text-align:center;}
   .card-word{
     font-family:'Fraunces'; font-weight:800; font-size:clamp(38px, 9vw, 56px); line-height:1.05;
-    margin:0 0 28px; word-break:break-word;
+    margin:0 0 28px; word-break:break-word; width:100%;
   }
   .taboo-label{display:flex; align-items:center; justify-content:center; gap:9px; font-size:14px; color:var(--red-dark); font-weight:700; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.02em;}
   .no-icon{width:16px; height:16px; border-radius:50%; border:2.5px solid var(--red-dark); position:relative; flex-shrink:0;}
@@ -246,6 +246,23 @@ function render(){
   const app = document.getElementById('app');
   app.innerHTML = '';
   app.appendChild(SCREENS[state.screen]());
+  if(state.screen === 'play') fitCardWord();
+}
+
+function fitCardWord(){
+  const el = document.querySelector('.card-word');
+  if(!el) return;
+  el.style.whiteSpace = 'nowrap';
+  el.style.fontSize = '';
+  const minSize = 22;
+  let size = parseFloat(getComputedStyle(el).fontSize);
+  while(el.scrollWidth > el.clientWidth && size > minSize){
+    size -= 1;
+    el.style.fontSize = size + 'px';
+  }
+  if(el.scrollWidth > el.clientWidth){
+    el.style.whiteSpace = 'normal'; // não coube nem no tamanho mínimo - permite quebrar como último recurso
+  }
 }
 
 function h(tag, attrs={}, children=[]){
@@ -307,7 +324,10 @@ function shuffle(arr){
 
 function buildDeck(){
   const pool = [];
-  state.selectedThemes.forEach(id => (SEED_BANK[id]||[]).forEach(c => pool.push(c)));
+  state.selectedThemes.forEach(id => {
+    const label = THEMES.find(t=>t.id===id)?.label || 'Geral';
+    (SEED_BANK[id]||[]).forEach(c => pool.push({...c, categoria: label}));
+  });
   return shuffle(pool);
 }
 
