@@ -20,12 +20,13 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return; // deixa as chamadas de API (POST) irem direto pra rede
+  if (!req.url.startsWith('http')) return; // ignora chrome-extension:// e outros esquemas que a Cache API não aceita
   event.respondWith(
     caches.match(req).then((cached) => {
       const network = fetch(req).then((res) => {
         if (res.ok) {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)).catch(() => {});
         }
         return res;
       }).catch(() => cached);
