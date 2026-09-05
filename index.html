@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Não Pode!</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#171220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Não Pode">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #171220;
+    --bg-raise: #1F1830;
+    --cream: #FBF3E1;
+    --ink: #211A2E;
+    --ink-soft: #4A4258;
+    --red: #E4432B;
+    --red-dark: #B8331F;
+    --teal: #2EC4B6;
+    --line: rgba(251,243,225,0.14);
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(120% 90% at 50% -10%, #241A38 0%, var(--bg) 55%);
+    color: var(--cream);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    overflow-x:hidden;
+  }
+  #app{
+    width:100%;
+    max-width:460px;
+    min-height:100vh;
+    padding: 20px 18px 32px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0;}
+  .screen{display:flex; flex-direction:column; flex:1; animation: rise .35s ease both;}
+  @keyframes rise{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes shake{ 10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);} 30%,50%,70%{transform:translateX(-9px);} 40%,60%{transform:translateX(9px);} }
+  @media (prefers-reduced-motion: reduce){ .screen{animation:none;} .card.time-up{animation:none !important;} }
+
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+  .brand-mark{
+    width:40px; height:40px; border-radius:50%;
+    background:var(--red);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; flex-shrink:0;
+    box-shadow: 0 4px 14px rgba(228,67,43,0.35);
+  }
+  .brand-mark::before{
+    content:'';
+    width:26px; height:4px; background:var(--cream);
+    transform:rotate(45deg); border-radius:2px;
+  }
+  .brand-title{font-size:26px; font-weight:700; letter-spacing:-0.01em; line-height:1;}
+  .brand-title em{font-style:normal; color:var(--red);}
+
+  .section-label{font-size:13px; color:var(--cream); opacity:0.55; margin:22px 0 10px; font-weight:500;}
+  .section-label:first-of-type{margin-top:0;}
+
+  .team-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .team-dot{width:14px; height:14px; border-radius:50%; flex-shrink:0;}
+  .team-input{
+    flex:1; background:var(--bg-raise); border:1px solid var(--line);
+    color:var(--cream); font-family:'Space Grotesk'; font-size:16px; font-weight:500;
+    padding:12px 14px; border-radius:12px; outline:none;
+  }
+  .team-input:focus{border-color:var(--red);}
+  .icon-btn{
+    width:38px; height:38px; border-radius:10px; border:1px solid var(--line);
+    background:var(--bg-raise); color:var(--cream); font-size:18px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .add-team{
+    display:flex; align-items:center; gap:8px; color:var(--cream); opacity:0.6;
+    font-size:14px; padding:8px 2px; cursor:pointer; width:fit-content;
+  }
+
+  .chip-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    padding:9px 14px; border-radius:999px; border:1px solid var(--line);
+    background:var(--bg-raise); color:var(--cream); font-size:14px; font-weight:500;
+    cursor:pointer; user-select:none; transition: background .15s, border-color .15s, color .15s;
+  }
+  .chip.active{background:var(--red); border-color:var(--red); color:var(--cream);}
+
+  .timer-choices{display:flex; gap:8px;}
+  .timer-choices .chip{flex:1; text-align:center;}
+
+  .mode-card{
+    display:flex; flex-direction:column; gap:4px;
+    padding:14px 16px; border-radius:14px; border:1px solid var(--line);
+    background:var(--bg-raise); cursor:pointer; margin-bottom:10px;
+  }
+  .mode-card.active{border-color:var(--red); background:rgba(228,67,43,0.14);}
+  .mode-card-title{font-weight:700; font-size:15px;}
+  .mode-card-desc{font-size:12.5px; opacity:0.62; line-height:1.45; margin-top:2px;}
+
+  .primary-btn{
+    margin-top:26px; background:var(--red); color:var(--cream); border:none;
+    border-radius:16px; padding:17px; font-family:'Fraunces'; font-weight:700; font-size:19px;
+    cursor:pointer; box-shadow: 0 8px 20px rgba(228,67,43,0.3);
+  }
+  .primary-btn:disabled{opacity:0.4; box-shadow:none;}
+  .ghost-btn{
+    background:transparent; color:var(--cream); border:1px solid var(--line);
+    border-radius:16px; padding:15px; font-family:'Space Grotesk'; font-weight:600; font-size:15px;
+    cursor:pointer;
+  }
+  .hint{font-size:12.5px; color:var(--cream); opacity:0.45; margin-top:8px; line-height:1.5;}
+
+  .intro-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px;}
+  .intro-eyebrow{font-size:14px; opacity:0.55; margin-bottom:4px;}
+  .intro-team{font-family:'Fraunces'; font-size:44px; font-weight:800; line-height:1.05;}
+  .intro-score{font-size:15px; opacity:0.6; margin-top:10px;}
+  .intro-role{margin-top:26px; font-size:15px; opacity:0.75; max-width:280px; line-height:1.5;}
+
+  .play-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .team-badge{display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600;}
+  .timer-badge{
+    display:flex; align-items:center; gap:6px;
+    font-family:'Fraunces'; font-size:26px; font-weight:700; font-variant-numeric: tabular-nums;
+  }
+  .timer-badge.low{color:var(--red);}
+  .track{height:6px; border-radius:99px; background:var(--bg-raise); overflow:hidden; margin-bottom:20px;}
+  .track-fill{height:100%; background:var(--teal); border-radius:99px; transition: width 1s linear, background .3s;}
+
+  .card{
+    background:var(--cream); color:var(--ink); border-radius:22px;
+    padding:30px 26px 26px; flex:1; display:flex; flex-direction:column;
+    position:relative; box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    min-height:340px;
+  }
+  .card.time-up{animation: shake .5s ease;}
+  .card-cat{font-size:12.5px; color:var(--ink-soft); font-weight:600; letter-spacing:0.02em;}
+  .card-word{
+    font-family:'Fraunces'; font-weight:800; font-size:38px; line-height:1.05;
+    margin:10px 0 22px; word-break:break-word;
+  }
+  .taboo-label{display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--red-dark); font-weight:700; margin-bottom:10px;}
+  .no-icon{width:15px; height:15px; border-radius:50%; border:2.5px solid var(--red-dark); position:relative; flex-shrink:0;}
+  .no-icon::before{content:''; position:absolute; width:15px; height:2.5px; background:var(--red-dark); top:50%; left:50%; transform:translate(-50%,-50%) rotate(-45deg);}
+  .taboo-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+  .taboo-list li{display:flex; align-items:center; gap:9px; font-size:18px; font-weight:600; color:var(--ink);}
+
+  .play-actions{display:flex; gap:10px; margin-top:16px;}
+  .act-btn{
+    flex:1; border:none; border-radius:16px; padding:16px 8px; font-family:'Space Grotesk';
+    font-weight:700; font-size:14.5px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .act-btn .big{font-size:20px;}
+  .act-correct{background:var(--teal); color:#0E2A27;}
+  .act-skip{background:var(--bg-raise); color:var(--cream); border:1px solid var(--line);}
+  .act-forbid{background:var(--red); color:var(--cream);}
+  .act-btn:disabled{opacity:0.35;}
+
+  .steal-panel{margin-top:16px;}
+  .steal-title{font-size:13px; color:var(--red); font-weight:700; margin-bottom:10px;}
+  .cancel-steal{font-size:13px; opacity:0.55; margin-top:10px; cursor:pointer; width:fit-content;}
+
+  .end-wrap{flex:1; display:flex; flex-direction:column;}
+  .end-title{font-size:28px; margin-bottom:4px;}
+  .end-sub{font-size:14px; opacity:0.6; margin-bottom:24px;}
+  .score-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--bg-raise); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:10px;
+  }
+  .score-row.leader{border-color:#FFB627;}
+  .score-name{display:flex; align-items:center; gap:9px; font-weight:600; font-size:15px;}
+  .score-val{font-family:'Fraunces'; font-weight:800; font-size:22px;}
+  .end-actions{margin-top:auto; display:flex; flex-direction:column; gap:10px; padding-top:20px;}
+
+  .error-box{
+    background:rgba(228,67,43,0.12); border:1px solid rgba(228,67,43,0.4); color:var(--cream);
+    border-radius:12px; padding:12px 14px; font-size:13px; margin-top:14px; line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const TEAM_COLORS = ['#2EC4B6','#FFB627','#9B6BFF','#FF6FA5','#B7DB43','#5EA1FF'];
+
+const THEMES = [
+  {id:'geral', label:'Geral'},
+  {id:'filmes_series', label:'Filmes e Séries'},
+  {id:'musica', label:'Música'},
+  {id:'comida', label:'Comida'},
+  {id:'esportes', label:'Esportes'},
+  {id:'famosos', label:'Famosos'},
+  {id:'lugares', label:'Lugares'},
+  {id:'objetos_dia_a_dia', label:'Objetos do dia a dia'},
+];
+
+const TIME_OPTIONS = { blitz:[30,60,90], single:[15,30,45] };
+
+const MODES = [
+  {id:'blitz', title:'🔥 Correria', desc:'O time acerta quantas cartas conseguir dentro do tempo. Falar palavra proibida rouba o ponto pro adversário.'},
+  {id:'single', title:'🎯 Carta única', desc:'Cada rodada vale uma carta só. Acertou dentro do tempo, marca ponto. Passou o tempo ou falou proibida, a vez passa (e o ponto pode ir pro adversário).'},
+];
+
+const SEED_BANK = {
+  geral: [
+    {palavra:'ANIVERSÁRIO', proibidas:['festa','bolo','idade','presente','parabéns']},
+    {palavra:'CHUVA', proibidas:['água','guarda-chuva','nuvem','molhado','tempestade']},
+    {palavra:'ESCOLA', proibidas:['aula','professor','aluno','prova','caderno']},
+    {palavra:'FÉRIAS', proibidas:['viagem','descanso','praia','trabalho','folga']},
+    {palavra:'CASAMENTO', proibidas:['noiva','noivo','aliança','igreja','festa']},
+  ],
+  filmes_series: [
+    {palavra:'TITANIC', proibidas:['navio','iceberg','afundar','Jack','Rose']},
+    {palavra:'FRIENDS', proibidas:['sofá','café','Nova York','amigos','seriado']},
+    {palavra:'HARRY POTTER', proibidas:['mágico','varinha','Hogwarts','bruxo','óculos']},
+  ],
+  musica: [
+    {palavra:'SAMBA', proibidas:['pandeiro','dança','Brasil','carnaval','ritmo']},
+    {palavra:'MICROFONE', proibidas:['cantar','som','voz','palco','shows']},
+  ],
+  comida: [
+    {palavra:'FEIJOADA', proibidas:['feijão','carne','arroz','brasileira','panela']},
+    {palavra:'PIZZA', proibidas:['queijo','massa','fatia','italiana','forno']},
+    {palavra:'BRIGADEIRO', proibidas:['chocolate','festa','doce','granulado','leite condensado']},
+  ],
+  esportes: [
+    {palavra:'FUTEBOL', proibidas:['bola','gol','time','campo','jogador']},
+    {palavra:'NATAÇÃO', proibidas:['piscina','água','nadar','raia','óculos']},
+  ],
+  famosos: [
+    {palavra:'PELÉ', proibidas:['futebol','rei','Brasil','camisa 10','gol']},
+  ],
+  lugares: [
+    {palavra:'FLORIANÓPOLIS', proibidas:['ilha','praia','ponte','Santa Catarina','Floripa']},
+    {palavra:'PARIS', proibidas:['torre','França','Eiffel','romântica','Europa']},
+  ],
+  objetos_dia_a_dia: [
+    {palavra:'GUARDA-CHUVA', proibidas:['chuva','abrir','molhado','proteger','varetas']},
+    {palavra:'ESCOVA DE DENTES', proibidas:['dente','escovar','pasta','boca','higiene']},
+  ],
+};
+
+let state = {
+  screen: 'setup',
+  teams: [{name:'Time 1'}, {name:'Time 2'}],
+  scores: [0,0],
+  currentTeam: 0,
+  selectedThemes: ['geral'],
+  gameMode: 'blitz',
+  roundSeconds: 60,
+  timeLeft: 60,
+  timerRunning: false,
+  timerHandle: null,
+  skipsLeft: 3,
+  pendingSteal: false,
+  deck: [],
+  usedWords: new Set(),
+  currentCard: null,
+  loadingCards: false,
+  fetchError: null,
+  roundCorrect: 0,
+  numRounds: 0,
+};
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(SCREENS[state.screen]());
+}
+
+function h(tag, attrs={}, children=[]){
+  const e = document.createElement(tag);
+  for(const k in attrs){
+    if(k === 'class') e.className = attrs[k];
+    else if(k === 'text') e.textContent = attrs[k];
+    else if(k.startsWith('on') && typeof attrs[k]==='function') e.addEventListener(k.slice(2), attrs[k]);
+    else if(attrs[k]!=null) e.setAttribute(k, attrs[k]);
+  }
+  (Array.isArray(children)?children:[children]).forEach(c=>{
+    if(c==null) return;
+    if(typeof c === 'string') e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  });
+  return e;
+}
+
+function brand(){
+  return h('div',{class:'brand'},[
+    h('div',{class:'brand-mark'}),
+    h('div',{class:'brand-title'},['Não ', h('em',{},'Pode!')])
+  ]);
+}
+
+// ---------- Audio: embedded alarm ----------
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq, dur, vol, type){
+  try{
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = vol;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + dur/1000);
+  }catch(e){ console.warn('audio indisponível', e); }
+}
+function playTick(){ beep(1000, 90, 0.18, 'square'); }
+function playAlarm(){
+  beep(1400, 180, 0.32, 'sawtooth');
+  setTimeout(()=>beep(1400,180,0.32,'sawtooth'), 220);
+  setTimeout(()=>beep(1800,280,0.34,'sawtooth'), 460);
+}
+
+// ---------- Card generation ----------
+async function fetchMoreCards(themes, excludeWords, count){
+  const themeLabels = themes.map(id => THEMES.find(t=>t.id===id).label).join(', ');
+  const exclude = Array.from(excludeWords).slice(-120).join(', ');
+  const system = `Você cria cartas para um jogo de tabuleiro tipo "Taboo" em português do Brasil.
+Cada carta tem: uma palavra-alvo (curta, conhecida, sem ser um nome próprio muito obscuro) e exatamente 5 palavras proibidas fortemente associadas a ela.
+Gere cartas dos temas: ${themeLabels}.
+Misture dificuldades fácil, média e difícil.
+NÃO repita nenhuma destas palavras já usadas: ${exclude || '(nenhuma ainda)'}.
+Responda SOMENTE com um array JSON válido, sem markdown, sem texto extra, no formato:
+[{"palavra":"EXEMPLO","proibidas":["a","b","c","d","e"],"categoria":"Geral","dificuldade":"facil"}]`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: system,
+      messages: [{role:"user", content:`Gere ${count} cartas novas agora.`}]
+    })
+  });
+  const data = await response.json();
+  const text = data.content.map(b => b.type==='text' ? b.text : '').join('');
+  const clean = text.replace(/```json|```/g,'').trim();
+  const cards = JSON.parse(clean);
+  return cards.filter(c => c.palavra && Array.isArray(c.proibidas));
+}
+
+async function ensureDeck(){
+  if(state.deck.length > 3 || state.loadingCards) return;
+  state.loadingCards = true;
+  updatePlayLoadingIndicator();
+  try{
+    const fresh = await fetchMoreCards(state.selectedThemes, state.usedWords, 12);
+    const novel = fresh.filter(c => !state.usedWords.has(c.palavra.toUpperCase()));
+    state.deck.push(...novel);
+    state.fetchError = null;
+  }catch(err){
+    console.error('Erro ao gerar cartas', err);
+    if(state.deck.length === 0){
+      state.fetchError = 'Não consegui gerar novas cartas agora. Usando o baralho local.';
+      seedFallback();
+    }
+  }
+  state.loadingCards = false;
+  updatePlayLoadingIndicator();
+}
+
+function seedFallback(){
+  const pool = [];
+  state.selectedThemes.forEach(id => (SEED_BANK[id]||[]).forEach(c => pool.push(c)));
+  shuffle(pool).forEach(c => { if(!state.usedWords.has(c.palavra)) state.deck.push(c); });
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function nextCard(){
+  if(state.deck.length === 0) seedFallback();
+  const card = state.deck.shift();
+  if(card) state.usedWords.add(card.palavra.toUpperCase());
+  state.currentCard = card || {palavra:'(preparando cartas...)', proibidas:[]};
+  ensureDeck();
+}
+
+function updatePlayLoadingIndicator(){
+  const badge = document.getElementById('deck-status');
+  if(!badge) return;
+  badge.style.display = state.loadingCards ? 'block' : 'none';
+}
+
+// ---------- Timer ----------
+function tickLoop(){
+  state.timerRunning = true;
+  state.timerHandle = setInterval(()=>{
+    state.timeLeft -= 1;
+    updateTimerUI();
+    if(state.timeLeft <= 3 && state.timeLeft > 0) playTick();
+    if(state.timeLeft <= 0){
+      clearInterval(state.timerHandle);
+      state.timerRunning = false;
+      playAlarm();
+      const cardEl = document.querySelector('.card');
+      if(cardEl) cardEl.classList.add('time-up');
+      setTimeout(()=>{ endRound(); }, 550);
+    }
+  }, 1000);
+}
+function startTimer(){ state.timeLeft = state.roundSeconds; tickLoop(); }
+function resumeTimer(){ if(!state.timerRunning) tickLoop(); }
+function stopTimer(){
+  if(state.timerHandle) clearInterval(state.timerHandle);
+  state.timerRunning = false;
+}
+function updateTimerUI(){
+  const t = document.getElementById('timer-num');
+  const fill = document.getElementById('track-fill');
+  if(!t) return;
+  t.textContent = state.timeLeft;
+  t.parentElement.classList.toggle('low', state.timeLeft <= 10);
+  const pct = Math.max(0, (state.timeLeft/state.roundSeconds)*100);
+  fill.style.width = pct+'%';
+  fill.style.background = state.timeLeft<=10 ? 'var(--red)' : 'var(--teal)';
+}
+
+// ---------- Screens ----------
+const SCREENS = {
+
+  setup(){
+    const wrap = h('div',{class:'screen'});
+    wrap.appendChild(brand());
+    wrap.appendChild(h('div',{class:'section-label', text:'Times'}));
+
+    state.teams.forEach((team, i)=>{
+      const row = h('div',{class:'team-row'},[
+        h('div',{class:'team-dot', style:`background:${TEAM_COLORS[i%TEAM_COLORS.length]}`}),
+      ]);
+      const input = h('input',{class:'team-input'});
+      input.value = team.name;
+      input.placeholder = `Time ${i+1}`;
+      input.addEventListener('input', e => { state.teams[i].name = e.target.value; });
+      row.appendChild(input);
+      if(state.teams.length > 2){
+        row.appendChild(h('div',{class:'icon-btn', text:'✕', onclick: ()=>{
+          state.teams.splice(i,1); state.scores.splice(i,1); render();
+        }}));
+      }
+      wrap.appendChild(row);
+    });
+
+    if(state.teams.length < 6){
+      wrap.appendChild(h('div',{class:'add-team', text:'+ adicionar time', onclick: ()=>{
+        state.teams.push({name:`Time ${state.teams.length+1}`});
+        state.scores.push(0);
+        render();
+      }}));
+    }
+
+    wrap.appendChild(h('div',{class:'section-label', text:'Temas (pode escolher vários)'}));
+    const chipGrid = h('div',{class:'chip-grid'});
+    THEMES.forEach(theme=>{
+      const active = state.selectedThemes.includes(theme.id);
+      chipGrid.appendChild(h('div',{class:'chip'+(active?' active':''), text:theme.label, onclick: ()=>{
+        if(state.selectedThemes.includes(theme.id)){
+          if(state.selectedThemes.length>1) state.selectedThemes = state.selectedThemes.filter(t=>t!==theme.id);
+        } else {
+          state.selectedThemes.push(theme.id);
+        }
+        render();
+      }}));
+    });
+    wrap.appendChild(chipGrid);
+
+    wrap.appendChild(h('div',{class:'section-label', text:'Modo de jogo'}));
+    MODES.forEach(m=>{
+      wrap.appendChild(h('div',{class:'mode-card'+(state.gameMode===m.id?' active':''), onclick:()=>{
+        state.gameMode = m.id;
+        if(!TIME_OPTIONS[m.id].includes(state.roundSeconds)) state.roundSeconds = TIME_OPTIONS[m.id][1];
+        render();
+      }},[
+        h('div',{class:'mode-card-title', text:m.title}),
+        h('div',{class:'mode-card-desc', text:m.desc}),
+      ]));
+    });
+
+    wrap.appendChild(h('div',{class:'section-label', text: state.gameMode==='blitz' ? 'Tempo por rodada' : 'Tempo por carta'}));
+    const timerChoices = h('div',{class:'timer-choices'});
+    TIME_OPTIONS[state.gameMode].forEach(sec=>{
+      timerChoices.appendChild(h('div',{class:'chip'+(state.roundSeconds===sec?' active':''), text:sec+'s', onclick:()=>{
+        state.roundSeconds = sec; render();
+      }}));
+    });
+    wrap.appendChild(timerChoices);
+
+    const hintText = state.gameMode==='blitz'
+      ? 'O cronômetro toca um alarme quando o tempo acaba. Ao falar palavra proibida, o ponto vai pro time adversário.'
+      : 'O cronômetro toca um alarme quando o tempo acaba. Só dá pra tentar uma carta por rodada: acertou, ponto seu; passou do tempo ou falou proibida, a vez passa (e o ponto pode ir pro adversário).';
+    wrap.appendChild(h('div',{class:'hint', text:hintText}));
+
+    wrap.appendChild(h('button',{class:'primary-btn', text:'Começar a jogar', onclick: beginGame}));
+    return wrap;
+  },
+
+  intro(){
+    const wrap = h('div',{class:'screen'});
+    wrap.appendChild(brand());
+    const team = state.teams[state.currentTeam];
+    const color = TEAM_COLORS[state.currentTeam % TEAM_COLORS.length];
+    const roleText = state.gameMode==='blitz'
+      ? `Vocês têm ${state.roundSeconds}s pra acertar o máximo de cartas possível. Passe o celular para quem vai dar as dicas.`
+      : `Vocês têm ${state.roundSeconds}s pra acertar essa única carta. Passe o celular para quem vai dar as dicas.`;
+    wrap.appendChild(h('div',{class:'intro-wrap'},[
+      h('div',{class:'intro-eyebrow', text:`Rodada ${state.numRounds+1}`}),
+      h('div',{class:'intro-team', style:`color:${color}`, text:team.name}),
+      h('div',{class:'intro-score', text: state.teams.map((t,i)=>`${t.name}: ${state.scores[i]}`).join('   ·   ')}),
+      h('div',{class:'intro-role', text: roleText}),
+    ]));
+    wrap.appendChild(h('button',{class:'primary-btn', text:`Pronto, começar (${state.roundSeconds}s)`, onclick: beginRound}));
+    return wrap;
+  },
+
+  play(){
+    const wrap = h('div',{class:'screen'});
+    const color = TEAM_COLORS[state.currentTeam % TEAM_COLORS.length];
+
+    wrap.appendChild(h('div',{class:'play-header'},[
+      h('div',{class:'team-badge'},[
+        h('div',{class:'team-dot', style:`background:${color}`}),
+        state.teams[state.currentTeam].name
+      ]),
+      h('div',{class:'timer-badge'},[h('span',{text:'⏰'}), h('span',{id:'timer-num', text: state.timeLeft})]),
+    ]));
+
+    wrap.appendChild(h('div',{class:'track'},[h('div',{class:'track-fill', id:'track-fill', style:`width:${(state.timeLeft/state.roundSeconds)*100}%`})]));
+
+    const card = state.currentCard;
+    const cardEl = h('div',{class:'card'});
+    if(card){
+      cardEl.appendChild(h('div',{class:'card-cat', text: card.categoria || THEMES.find(t=>t.id===state.selectedThemes[0])?.label || 'Geral'}));
+      cardEl.appendChild(h('div',{class:'card-word', text: card.palavra}));
+      cardEl.appendChild(h('div',{class:'taboo-label'},[h('div',{class:'no-icon'}), 'não pode dizer']));
+      const list = h('ul',{class:'taboo-list'});
+      (card.proibidas||[]).forEach(w=> list.appendChild(h('li',{},[h('div',{class:'no-icon'}), w])));
+      cardEl.appendChild(list);
+    }
+    wrap.appendChild(cardEl);
+
+    wrap.appendChild(h('div',{id:'deck-status', class:'hint', text:'Preparando mais cartas...', style: state.loadingCards?'display:block':'display:none'}));
+    if(state.fetchError) wrap.appendChild(h('div',{class:'error-box', text: state.fetchError}));
+
+    if(state.pendingSteal){
+      const otherTeams = state.teams.map((t,i)=>i).filter(i=>i!==state.currentTeam);
+      const panel = h('div',{class:'steal-panel'});
+      panel.appendChild(h('div',{class:'steal-title', text:'⚠️ Quem pegou a palavra proibida? Escolha o time que rouba o ponto:'}));
+      const grid = h('div',{class:'chip-grid'});
+      otherTeams.forEach(i=>{
+        grid.appendChild(h('div',{class:'chip', text:state.teams[i].name, onclick: ()=>chooseStealTeam(i)}));
+      });
+      panel.appendChild(grid);
+      panel.appendChild(h('div',{class:'cancel-steal', text:'cancelar', onclick: cancelSteal}));
+      wrap.appendChild(panel);
+    } else {
+      const skipDisabled = state.gameMode==='blitz' && state.skipsLeft<=0;
+      const skipLabel = state.gameMode==='blitz' ? `Pular (${state.skipsLeft})` : 'Pular';
+      wrap.appendChild(h('div',{class:'play-actions'},[
+        h('button',{class:'act-btn act-forbid', onclick: onForbidden},[h('div',{class:'big', text:'✕'}), 'Não pode']),
+        h('button',{class:'act-btn act-skip', disabled: skipDisabled?'true':null, onclick: onSkip},[h('div',{class:'big', text:'⟳'}), skipLabel]),
+        h('button',{class:'act-btn act-correct', onclick: onCorrect},[h('div',{class:'big', text:'✓'}), 'Acertou']),
+      ]));
+    }
+
+    return wrap;
+  },
+
+  roundEnd(){
+    const wrap = h('div',{class:'screen end-wrap'});
+    wrap.appendChild(brand());
+    wrap.appendChild(h('div',{class:'end-title', text:'Tempo!'}));
+
+    const subText = state.gameMode === 'blitz'
+      ? `${state.teams[state.currentTeam].name} acertou ${state.roundCorrect} carta${state.roundCorrect===1?'':'s'} nessa rodada.`
+      : (state.roundCorrect > 0 ? `${state.teams[state.currentTeam].name} acertou a carta! 🎉` : `${state.teams[state.currentTeam].name} não conseguiu dessa vez.`);
+    wrap.appendChild(h('div',{class:'end-sub', text: subText}));
+
+    const ordered = state.teams.map((t,i)=>({name:t.name, score:state.scores[i], i})).sort((a,b)=>b.score-a.score);
+    const maxScore = ordered[0]?.score ?? 0;
+    ordered.forEach(t=>{
+      wrap.appendChild(h('div',{class:'score-row'+(t.score===maxScore && maxScore>0 ? ' leader':'')},[
+        h('div',{class:'score-name'},[h('div',{class:'team-dot', style:`background:${TEAM_COLORS[t.i%TEAM_COLORS.length]}`}), t.name]),
+        h('div',{class:'score-val', text:t.score}),
+      ]));
+    });
+
+    wrap.appendChild(h('div',{class:'end-actions'},[
+      h('button',{class:'primary-btn', text:'Próximo time', onclick: nextTeamRound}),
+      h('button',{class:'ghost-btn', text:'Encerrar jogo', onclick: ()=>{ state.screen='final'; render(); }}),
+    ]));
+    return wrap;
+  },
+
+  final(){
+    const wrap = h('div',{class:'screen end-wrap'});
+    wrap.appendChild(brand());
+    const ordered = state.teams.map((t,i)=>({name:t.name, score:state.scores[i], i})).sort((a,b)=>b.score-a.score);
+    const maxScore = ordered[0].score;
+    const winners = ordered.filter(t=>t.score===maxScore);
+    const titleText = winners.length > 1
+      ? `🤝 Empate entre ${joinNames(winners.map(w=>w.name))}!`
+      : `🏆 ${winners[0].name} venceu!`;
+    wrap.appendChild(h('div',{class:'end-title', text:titleText}));
+    wrap.appendChild(h('div',{class:'end-sub', text:'Placar final'}));
+    ordered.forEach((t)=>{
+      wrap.appendChild(h('div',{class:'score-row'+(t.score===maxScore?' leader':'')},[
+        h('div',{class:'score-name'},[h('div',{class:'team-dot', style:`background:${TEAM_COLORS[t.i%TEAM_COLORS.length]}`}), t.name]),
+        h('div',{class:'score-val', text:t.score}),
+      ]));
+    });
+    wrap.appendChild(h('div',{class:'end-actions'},[
+      h('button',{class:'primary-btn', text:'Jogar de novo (mesma configuração)', onclick: resetGame}),
+      h('button',{class:'ghost-btn', text:'Mudar times, temas ou modo', onclick: backToSetup}),
+    ]));
+    return wrap;
+  },
+};
+
+function joinNames(names){
+  if(names.length<=1) return names[0]||'';
+  if(names.length===2) return `${names[0]} e ${names[1]}`;
+  return `${names.slice(0,-1).join(', ')} e ${names[names.length-1]}`;
+}
+
+// ---------- Actions ----------
+function beginGame(){
+  state.scores = state.teams.map(()=>0);
+  state.currentTeam = 0;
+  state.numRounds = 0;
+  state.usedWords = new Set();
+  state.deck = [];
+  seedFallback();
+  ensureDeck();
+  state.screen = 'intro';
+  render();
+}
+
+function beginRound(){
+  state.roundCorrect = 0;
+  state.skipsLeft = 3;
+  state.pendingSteal = false;
+  state.fetchError = null;
+  nextCard();
+  state.screen = 'play';
+  render();
+  startTimer();
+  updateTimerUI();
+}
+
+function onCorrect(){
+  state.scores[state.currentTeam] += 1;
+  state.roundCorrect += 1;
+  if(state.gameMode === 'blitz'){
+    nextCard();
+    render_playInPlace();
+  } else {
+    stopTimer();
+    endRound();
+  }
+}
+
+function onSkip(){
+  if(state.gameMode === 'blitz'){
+    if(state.skipsLeft<=0) return;
+    state.skipsLeft -= 1;
+    const skipped = state.currentCard;
+    nextCard();
+    if(skipped && skipped.palavra) state.deck.push(skipped);
+    render_playInPlace();
+  } else {
+    stopTimer();
+    state.roundCorrect = 0;
+    endRound();
+  }
+}
+
+function onForbidden(){
+  if(state.teams.length === 2){
+    const other = 1 - state.currentTeam;
+    state.scores[other] += 1;
+    resolveForbiddenOutcome();
+  } else {
+    stopTimer();
+    state.pendingSteal = true;
+    render_playInPlace();
+  }
+}
+function chooseStealTeam(idx){
+  state.scores[idx] += 1;
+  state.pendingSteal = false;
+  resolveForbiddenOutcome();
+}
+function cancelSteal(){
+  state.pendingSteal = false;
+  resumeTimer();
+  render_playInPlace();
+}
+function resolveForbiddenOutcome(){
+  if(state.gameMode === 'single'){
+    state.roundCorrect = 0;
+    stopTimer();
+    endRound();
+  } else {
+    nextCard();
+    resumeTimer();
+    render_playInPlace();
+  }
+}
+
+function render_playInPlace(){
+  if(state.screen==='play'){ render(); updateTimerUI(); }
+}
+
+function endRound(){
+  state.numRounds += 1;
+  state.screen = 'roundEnd';
+  render();
+}
+function nextTeamRound(){
+  state.currentTeam = (state.currentTeam+1) % state.teams.length;
+  state.screen = 'intro';
+  render();
+}
+function resetGame(){
+  state.scores = state.teams.map(()=>0);
+  state.currentTeam = 0;
+  state.numRounds = 0;
+  state.screen = 'intro';
+  render();
+}
+function backToSetup(){
+  state.scores = state.teams.map(()=>0);
+  state.currentTeam = 0;
+  state.numRounds = 0;
+  state.screen = 'setup';
+  render();
+}
+
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Service worker falhou', err));
+  });
+}
+</script>
+</body>
+</html>
